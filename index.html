@@ -135,10 +135,59 @@ const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbw25mbSP6E1kpFtV0tM
 const toggleBtn = document.getElementById('toggleAdvanced');
 const advancedFields = document.getElementById('advancedFields');
 
+// Cria labels de referência
+const taxaLabel = document.createElement('div');
+taxaLabel.style.color = '#b0f2d5';
+taxaLabel.style.marginBottom = '4px';
+taxaLabel.style.fontSize = '14px';
+taxaLabel.style.fontWeight = 'bold';
+FORM.querySelector('#taxa').parentNode.insertBefore(taxaLabel, FORM.querySelector('#taxa'));
+
+const compradorLabel = document.createElement('div');
+compradorLabel.style.color = '#b0f2d5';
+compradorLabel.style.marginBottom = '4px';
+compradorLabel.style.fontSize = '14px';
+compradorLabel.style.fontWeight = 'bold';
+FORM.querySelector('#comprador').parentNode.insertBefore(compradorLabel, FORM.querySelector('#comprador'));
+
 toggleBtn.addEventListener('click', () => {
   advancedFields.classList.toggle('hidden');
 });
 
+// Função para buscar dados da planilha
+async function carregarReferencia(id) {
+  if (!id) {
+    taxaLabel.textContent = '';
+    compradorLabel.textContent = '';
+    return;
+  }
+
+  try {
+    // Aqui usamos GET para buscar dados da planilha
+    const res = await fetch(`${WEB_APP_URL}?id=${id}`);
+    const data = await res.json();
+
+    if (data.status === 'success') {
+      taxaLabel.textContent = `Taxa atual: ${data.taxa || '---'}`;
+      compradorLabel.textContent = `Comprador atual: ${data.comprador || '---'}`;
+    } else {
+      taxaLabel.textContent = '';
+      compradorLabel.textContent = '';
+      MSG.textContent = data.message;
+    }
+  } catch (err) {
+    console.error(err);
+    MSG.textContent = '❌ Erro ao buscar dados.';
+  }
+}
+
+// Quando muda o ID
+document.getElementById('id').addEventListener('change', (e) => {
+  const selectedId = e.target.value;
+  carregarReferencia(selectedId);
+});
+
+// Envio do formulário
 FORM.addEventListener('submit', async (e) => {
   e.preventDefault();
 
@@ -167,6 +216,8 @@ FORM.addEventListener('submit', async (e) => {
     MSG.textContent = '✅ Dados atualizados com sucesso!';
     FORM.reset();
     advancedFields.classList.add('hidden');
+    taxaLabel.textContent = '';
+    compradorLabel.textContent = '';
   } catch (error) {
     console.error(error);
     MSG.textContent = '❌ Erro ao enviar dados.';
