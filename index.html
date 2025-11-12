@@ -1,84 +1,100 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Atualizar Dados - Painel OLX Pay</title>
-  <style>
-    body {
-      background-color: #1e1e1e;
-      color: #fff;
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 20px;
-    }
-    h1 {
-      text-align: center;
-      margin-bottom: 25px;
-      color: #00bfa5;
-    }
-    form {
-      max-width: 500px;
-      margin: 0 auto;
-      background: #2b2b2b;
-      padding: 25px;
-      border-radius: 12px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.5);
-    }
-    label {
-      display: block;
-      margin-top: 12px;
-      font-weight: bold;
-      color: #e0e0e0;
-    }
-    input {
-      width: 100%;
-      padding: 10px;
-      margin-top: 5px;
-      border: none;
-      border-radius: 6px;
-      background: #3a3a3a;
-      color: #fff;
-      font-size: 14px;
-    }
-    input:focus {
-      outline: 2px solid #00bfa5;
-    }
-    button {
-      width: 100%;
-      margin-top: 20px;
-      padding: 12px;
-      background-color: #00bfa5;
-      border: none;
-      border-radius: 8px;
-      color: #fff;
-      font-weight: bold;
-      font-size: 16px;
-      cursor: pointer;
-      transition: background 0.3s;
-    }
-    button:hover {
-      background-color: #009e8e;
-    }
-    .msg {
-      text-align: center;
-      margin-top: 15px;
-      font-weight: bold;
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Atualizar Dados - Painel OLX Pay</title>
+<style>
+  body {
+    background-color: #1e1e1e;
+    color: #fff;
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 20px;
+  }
+  h1 {
+    text-align: center;
+    margin-bottom: 25px;
+    color: #00bfa5;
+  }
+  form {
+    max-width: 500px;
+    margin: 0 auto;
+    background: #2b2b2b;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.5);
+  }
+  label {
+    display: block;
+    margin-top: 12px;
+    font-weight: bold;
+    color: #e0e0e0;
+  }
+  input, select {
+    width: 100%;
+    padding: 10px;
+    margin-top: 5px;
+    border: none;
+    border-radius: 6px;
+    background: #3a3a3a;
+    color: #fff;
+    font-size: 14px;
+  }
+  input:focus, select:focus {
+    outline: 2px solid #00bfa5;
+  }
+  button {
+    width: 100%;
+    margin-top: 20px;
+    padding: 12px;
+    background-color: #00bfa5;
+    border: none;
+    border-radius: 8px;
+    color: #fff;
+    font-weight: bold;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background 0.3s;
+  }
+  button:hover {
+    background-color: #009e8e;
+  }
+  .msg {
+    text-align: center;
+    margin-top: 15px;
+    font-weight: bold;
+  }
+  .hidden {
+    display: none;
+  }
+  @media (max-width: 600px) {
+    body { padding: 15px; }
+    form { padding: 20px; }
+    input, select { font-size: 16px; }
+    button { font-size: 16px; }
+  }
+</style>
 </head>
 <body>
-  <h1>Atualizar Dados da Planilha</h1>
-  <form id="updateForm">
-    <label>Taxa</label>
-    <input type="text" id="taxa" name="taxa">
+<h1>Atualizar Dados da Planilha</h1>
+<form id="updateForm">
+  <label for="id">Selecione o ID</label>
+  <select id="id" name="id" required>
+    <option value="">-- Escolha o ID --</option>
+    <option value="pay1001">pay1001</option>
+    <option value="pay1002">pay1002</option>
+    <option value="pay1003">pay1003</option>
+    <option value="pay1004">pay1004</option>
+  </select>
 
-    <label>Prazo</label>
-    <input type="text" id="prazo" name="prazo">
+  <label>Taxa</label>
+  <input type="text" id="taxa" name="taxa">
 
-    <label>Comprador</label>
-    <input type="text" id="comprador" name="comprador">
+  <label>Comprador</label>
+  <input type="text" id="comprador" name="comprador">
 
+  <div id="advancedFields" class="hidden">
     <label>Valor</label>
     <input type="text" id="valor" name="valor">
 
@@ -105,46 +121,59 @@
 
     <label>Link de Pagamento</label>
     <input type="text" id="linkPagamento" name="linkPagamento">
+  </div>
 
-    <button type="submit">Salvar Alterações</button>
-    <div class="msg" id="msg"></div>
-  </form>
+  <button type="button" id="toggleAdvanced">Atualização avançada</button>
+  <button type="submit">Salvar Alterações</button>
+  <div class="msg" id="msg"></div>
+</form>
 
-  <script>
-    const FORM = document.getElementById('updateForm');
-    const MSG = document.getElementById('msg');
-    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbw25mbSP6E1kpFtV0tMy0Y3IMHoUw9_oTu79oOeDqwfDSse5SklzEi3JxPlevsRh5BDsg/exec';
+<script>
+const FORM = document.getElementById('updateForm');
+const MSG = document.getElementById('msg');
+const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbw25mbSP6E1kpFtV0tMy0Y3IMHoUw9_oTu79oOeDqwfDSse5SklzEi3JxPlevsRh5BDsg/exec';
+const toggleBtn = document.getElementById('toggleAdvanced');
+const advancedFields = document.getElementById('advancedFields');
 
-    FORM.addEventListener('submit', async (e) => {
-      e.preventDefault();
+toggleBtn.addEventListener('click', () => {
+  advancedFields.classList.toggle('hidden');
+});
 
-      const formData = new FormData(FORM);
-      const dados = {};
+FORM.addEventListener('submit', async (e) => {
+  e.preventDefault();
 
-      // Envia apenas campos preenchidos
-      formData.forEach((value, key) => {
-        if (value.trim() !== '') {
-          dados[key] = value.toString();
-        }
-      });
+  const formData = new FormData(FORM);
+  const dados = {};
 
-      try {
-        MSG.textContent = 'Salvando...';
-        await fetch(WEB_APP_URL, {
-          method: 'POST',
-          mode: 'no-cors',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(dados)
-        });
-        MSG.textContent = '✅ Dados atualizados com sucesso!';
-        FORM.reset();
-      } catch (error) {
-        console.error(error);
-        MSG.textContent = '❌ Erro ao enviar dados.';
-      }
+  formData.forEach((value, key) => {
+    if (value.trim() !== '') {
+      dados[key] = value.toString();
+    }
+  });
 
-      setTimeout(() => { MSG.textContent = ''; }, 3000);
+  if (!dados.id) {
+    MSG.textContent = '❌ Selecione um ID.';
+    return;
+  }
+
+  try {
+    MSG.textContent = 'Salvando...';
+    await fetch(WEB_APP_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(dados)
     });
-  </script>
+    MSG.textContent = '✅ Dados atualizados com sucesso!';
+    FORM.reset();
+    advancedFields.classList.add('hidden');
+  } catch (error) {
+    console.error(error);
+    MSG.textContent = '❌ Erro ao enviar dados.';
+  }
+
+  setTimeout(() => { MSG.textContent = ''; }, 3000);
+});
+</script>
 </body>
-      </html>
+  </html>
