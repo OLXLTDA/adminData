@@ -1,0 +1,199 @@
+/* --- ESTILOS GERAIS --- */
+body { 
+  background: #1e1e1e; 
+  color: #fff; 
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+  padding: 20px; 
+  margin: 0; 
+}
+
+form { 
+  max-width: 500px; 
+  margin: 0 auto; 
+  background: #2b2b2b; 
+  padding: 30px; 
+  border-radius: 12px; 
+  box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+}
+
+h2 { 
+  text-align: center; 
+  color: #00bfa5; 
+  margin-top: 0; 
+}
+
+label { 
+  display: block; 
+  font-size: 12px; 
+  color: #ccc; 
+  text-transform: uppercase; 
+  font-weight: bold; 
+  margin-top: 15px; 
+}
+
+input { 
+  width: 100%; 
+  padding: 12px; 
+  margin-top: 5px; 
+  background: #3a3a3a; 
+  border: 1px solid #444; 
+  color: #fff; 
+  border-radius: 6px; 
+  box-sizing: border-box; 
+  font-size: 15px; 
+  transition: 0.3s;
+}
+
+input:focus { 
+  border-color: #00bfa5; 
+  outline: none; 
+  background: #444; 
+}
+
+.divider {
+  border: 0; 
+  border-top: 1px solid #444; 
+  margin: 20px 0;
+}
+
+.divider-text {
+  font-size: 12px; 
+  color: #888; 
+  text-align: center; 
+  letter-spacing: 1px;
+}
+
+button#btnSalvar { 
+  width: 100%; 
+  padding: 15px; 
+  background: #00bfa5; 
+  border: none; 
+  border-radius: 8px; 
+  color: #fff; 
+  font-weight: bold; 
+  cursor: pointer; 
+  font-size: 16px; 
+  margin-top: 25px; 
+  transition: 0.2s;
+}
+
+button#btnSalvar:hover { 
+  background: #009e8e; 
+  transform: translateY(-2px); 
+}
+
+button:disabled { 
+  background: #555; 
+  cursor: not-allowed; 
+  opacity: 0.7; 
+}
+
+/* --- MODAL --- */
+.modal { 
+  display: none; 
+  position: fixed; 
+  top: 0; 
+  left: 0; 
+  width: 100%; 
+  height: 100%; 
+  background: rgba(0,0,0,0.9); 
+  align-items: center; 
+  justify-content: center; 
+  z-index: 1000;
+}
+
+.modal.active { 
+  display: flex; 
+  animation: fadeIn 0.3s; 
+}
+
+.modal-box { 
+  background: #222; 
+  padding: 30px; 
+  border-radius: 10px; 
+  text-align: center; 
+  max-width: 450px; 
+  width: 90%; 
+  border: 1px solid #444; 
+  box-shadow: 0 0 50px rgba(0,191,165,0.2);
+}
+
+.modal-title {
+  color: #00bfa5; 
+  margin-top: 0;
+}
+
+.modal-subtitle {
+  color: #aaa; 
+  font-size: 14px;
+}
+
+.link-display { 
+  background: #111; 
+  padding: 15px; 
+  color: #00bfa5; 
+  word-break: break-all; 
+  margin: 20px 0; 
+  border-radius: 5px; 
+  font-family: monospace; 
+  border: 1px dashed #333; 
+  font-size: 13px;
+}
+
+.actions-grid {
+  display: grid; 
+  grid-template-columns: 1fr 1fr; 
+  gap: 10px; 
+  margin-bottom: 10px;
+}
+
+.btn-action { 
+  padding: 12px; 
+  border: none; 
+  border-radius: 6px; 
+  cursor: pointer; 
+  font-weight: bold; 
+  width: 100%; 
+  font-size: 14px;
+  display: flex; 
+  align-items: center; 
+  justify-content: center; 
+  gap: 8px; 
+  text-decoration: none;
+  box-sizing: border-box;
+}
+
+.btn-copy { 
+  background: #fff; 
+  color: #000; 
+}
+.btn-copy:hover { 
+  background: #f0f0f0; 
+}
+
+.btn-view { 
+  background: #333; 
+  color: #fff; 
+  border: 1px solid #555; 
+}
+.btn-view:hover { 
+  background: #444; 
+  border-color: #fff; 
+}
+
+.btn-new { 
+  background: transparent; 
+  color: #888; 
+  border: 1px solid #444; 
+  width: 100%; 
+  margin-top: 5px;
+}
+.btn-new:hover { 
+  color: #fff; 
+  border-color: #fff; 
+}
+
+@keyframes fadeIn { 
+  from { opacity: 0; } 
+  to { opacity: 1; } 
+}
