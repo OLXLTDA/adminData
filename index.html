@@ -5,7 +5,74 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Admin - Gerador de Links OLX</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-<link rel="stylesheet" href="admin.css">
+<style>
+  /* --- ESTILOS --- */
+  body { background:#1e1e1e; color:#fff; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding:20px; margin:0; }
+  
+  form { 
+    max-width:500px; margin:0 auto; background:#2b2b2b; padding:30px; 
+    border-radius:12px; box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+  }
+  
+  h2 { text-align:center; color:#00bfa5; margin-top:0; }
+  
+  label { 
+    display:block; font-size: 12px; color: #ccc; 
+    text-transform: uppercase; font-weight: bold; margin-top: 15px; 
+  }
+  
+  input { 
+    width:100%; padding:12px; margin-top:5px; background:#3a3a3a; 
+    border:1px solid #444; color:#fff; border-radius:6px; box-sizing: border-box; 
+    font-size: 15px; transition: 0.3s;
+  }
+  input:focus { border-color: #00bfa5; outline: none; background: #444; }
+  
+  button#btnSalvar { 
+    width:100%; padding:15px; background:#00bfa5; border:none; 
+    border-radius:8px; color:#fff; font-weight:bold; cursor:pointer; 
+    font-size: 16px; margin-top: 25px; transition: 0.2s;
+  }
+  button#btnSalvar:hover { background:#009e8e; transform: translateY(-2px); }
+  button:disabled { background: #555; cursor: not-allowed; opacity: 0.7; }
+  
+  /* --- MODAL --- */
+  .modal { 
+    display:none; position:fixed; top:0; left:0; width:100%; height:100%; 
+    background:rgba(0,0,0,0.9); align-items:center; justify-content:center; z-index: 1000;
+  }
+  .modal.active { display:flex; animation: fadeIn 0.3s; }
+  
+  .modal-box { 
+    background:#222; padding:30px; border-radius:10px; text-align:center; 
+    max-width:450px; width: 90%; border: 1px solid #444; box-shadow: 0 0 50px rgba(0,191,165,0.2);
+  }
+  
+  .link-display { 
+    background:#111; padding:15px; color:#00bfa5; word-break:break-all; 
+    margin:20px 0; border-radius:5px; font-family: monospace; border: 1px dashed #333; font-size: 13px;
+  }
+  
+  .actions-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;
+  }
+
+  .btn-action { 
+    padding:12px; border:none; border-radius:6px; cursor:pointer; font-weight:bold; width: 100%; font-size:14px;
+    display: flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none;
+  }
+  
+  .btn-copy { background:#fff; color:#000; }
+  .btn-copy:hover { background:#f0f0f0; }
+
+  .btn-view { background:#333; color:#fff; border: 1px solid #555; }
+  .btn-view:hover { background:#444; border-color: #fff; }
+
+  .btn-new { background:transparent; color:#888; border: 1px solid #444; width: 100%; margin-top: 5px;}
+  .btn-new:hover { color: #fff; border-color: #fff; }
+
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+</style>
 </head>
 <body>
 
@@ -21,8 +88,8 @@
   <label>Taxa de Serviço</label>
   <input type="text" name="taxa" class="money" placeholder="R$ 0,00">
 
-  <hr class="divider">
-  <p class="divider-text">DADOS PRÉ-DEFINIDOS</p>
+  <hr style="border:0; border-top:1px solid #444; margin: 20px 0;">
+  <p style="font-size:12px; color:#888; text-align:center; letter-spacing:1px;">DADOS PRÉ-DEFINIDOS</p>
 
   <label>Valor Total</label>
   <input type="text" name="valor" class="money" value="R$ 1.000,00">
@@ -56,8 +123,8 @@
 
 <div class="modal" id="modalSuccess">
   <div class="modal-box">
-    <h3 class="modal-title">Link Gerado com Sucesso!</h3>
-    <p class="modal-subtitle">Envie este link para o cliente.</p>
+    <h3 style="color:#00bfa5; margin-top:0;">Link Gerado com Sucesso!</h3>
+    <p style="color:#aaa; font-size:14px;">Envie este link para o cliente.</p>
     
     <div class="link-display" id="finalLink">...</div>
     
@@ -74,7 +141,109 @@
   </div>
 </div>
 
-<script src="admin.js"></script>
+<script>
+// ========================================================
+// ⚙️ CONFIGURAÇÃO
+// ========================================================
+
+const BACKEND_URL = 'https://script.google.com/macros/s/AKfycbw25mbSP6E1kpFtV0tMy0Y3IMHoUw9_oTu79oOeDqwfDSse5SklzEi3JxPlevsRh5BDsg/exec'; 
+const CLIENTE_URL = 'https://olxltda.github.io/OLX/'; 
+
+// ========================================================
+
+const form = document.getElementById('adminForm');
+const modal = document.getElementById('modalSuccess');
+const linkDisplay = document.getElementById('finalLink');
+const btnSalvar = document.getElementById('btnSalvar');
+const btnCopy = document.getElementById('btnCopy');
+const btnView = document.getElementById('btnView');
+const inputLinkPagamento = document.getElementById('linkPagamento');
+
+// --- 1. LÓGICA DE MÁSCARA DE MOEDA (R$) ---
+const moneyInputs = document.querySelectorAll('.money');
+const formatMoney = (value) => {
+  value = value.replace(/\D/g, "");
+  const amount = parseFloat(value) / 100;
+  return amount.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+};
+moneyInputs.forEach(input => {
+  input.addEventListener('input', (e) => e.target.value = formatMoney(e.target.value));
+  if(input.value) {
+    const cleanVal = input.value.replace(/\D/g, "");
+    if(cleanVal) input.value = formatMoney(cleanVal);
+  }
+});
+
+// --- 2. RECUPERAR ÚLTIMO LINK DA PLANILHA (Sem Cache Local) ---
+document.addEventListener('DOMContentLoaded', async () => {
+  try {
+    const res = await fetch(`${BACKEND_URL}?action=getLastLink`);
+    const json = await res.json();
+    
+    if(json.status === 'success' && json.link) {
+      inputLinkPagamento.value = json.link;
+    } else {
+      inputLinkPagamento.placeholder = "Nenhum link anterior encontrado";
+    }
+  } catch(e) {
+    console.error("Erro ao buscar ultimo link", e);
+    inputLinkPagamento.placeholder = "Erro ao carregar link";
+  }
+});
+
+// --- 3. ENVIO DO FORMULÁRIO ---
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  
+  btnSalvar.textContent = "Processando...";
+  btnSalvar.disabled = true;
+
+  const data = {};
+  new FormData(form).forEach((v, k) => data[k] = v);
+
+  try {
+    const res = await fetch(BACKEND_URL, {
+      method: 'POST',
+      redirect: 'follow', 
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(data)
+    });
+    
+    const json = await res.json();
+
+    if (json.status === 'success') {
+      const linkPronto = `${CLIENTE_URL}?id=${json.id}`;
+      
+      // Atualiza interface
+      linkDisplay.textContent = linkPronto;
+      btnView.href = linkPronto; // Define o link do botão Visualizar
+      
+      modal.classList.add('active');
+    } else {
+      alert('Erro do Servidor: ' + json.message);
+    }
+
+  } catch (err) {
+    console.error(err);
+    alert('Erro de conexão!');
+  } finally {
+    btnSalvar.textContent = "Gerar Link do Cliente";
+    btnSalvar.disabled = false;
+  }
+});
+
+// Botão Copiar
+btnCopy.addEventListener('click', () => {
+  navigator.clipboard.writeText(linkDisplay.textContent);
+  const originalHTML = btnCopy.innerHTML;
+  btnCopy.innerHTML = `<i class="fa-solid fa-check"></i> Copiado!`;
+  btnCopy.style.background = "#4CAF50";
+  setTimeout(() => {
+    btnCopy.innerHTML = originalHTML;
+    btnCopy.style.background = "#fff";
+  }, 2000);
+});
+</script>
 
 </body>
 </html>
